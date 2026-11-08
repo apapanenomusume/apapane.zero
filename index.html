@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1420">
+  <meta name="description" content="雀魂三麻向け・ブラウザだけで動く牌効率分析（門前14枚）">
+  <title>雀魂 三麻ハンドアナライザー</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar"><div class="topbar-inner">
+    <div><p class="eyebrow">SANMA // LOCAL BROWSER TOOL</p><h1>雀魂 <span>三麻ハンドアナライザー</span></h1><p class="subtitle">インストール不要 · 手牌だけで牌効率と役候補を分析</p></div>
+    <div class="badge">ブラウザ内だけで処理</div>
+  </div></header>
+  <main class="page">
+    <section class="card hand-card">
+      <div class="section-header"><div><h2>01 <span>手牌の入力</span></h2><p>14枚の門前手牌を入力してください。下の牌をタップしても追加できます。</p></div><button id="clear" class="btn secondary">すべて消去</button></div>
+      <div class="hand-wrapper"><div id="hand" class="hand" aria-live="polite"></div><span id="count" class="counter">0 / 14 枚</span></div>
+      <div class="input-flex"><label for="textInput" class="sr-only">牌表記</label><input id="textInput" type="text" spellcheck="false" autocomplete="off" placeholder="例：19m123456p123456s" value="19m123456p123456s"><button id="applyText" class="btn">手牌に反映</button><button id="demo" class="btn secondary">例を表示</button></div>
+      <p class="hint">牌表記：萬子 <code>1m</code> <code>9m</code>、筒子 <code>1p〜9p</code>、索子 <code>1s〜9s</code>、字牌 <code>1z〜7z</code>。赤5は <code>0p</code> <code>0s</code>。手牌をタップすると削除できます。</p>
+      <div id="palette" class="palette"></div>
+      <div class="filters"><label>自風 <select id="seat"><option value="27">東</option><option value="28" selected>南</option><option value="29">西</option></select></label><label>場風 <select id="round"><option value="27" selected>東</option><option value="28">南</option></select></label><label class="check"><input type="checkbox" id="riichi" checked> 立直できる前提で表示</label></div>
+      <p id="message" class="message" role="status">手牌を解析できます。</p>
+    </section>
+    <section class="card results-card">
+      <div class="section-header"><div><h2>02 <span>打牌候補</span></h2><p>向聴数 → 理論受け入れ枚数の順に表示します。</p></div><div id="summary" class="summary">入力待ち</div></div>
+      <div class="table-scroll"><table class="result-table"><thead><tr><th>切る牌</th><th>向聴</th><th>受け入れ*</th><th>有効牌の種類</th><th>成立役 / 役候補</th></tr></thead><tbody id="results"><tr><td colspan="5" class="empty">14枚入力すると分析を開始します。</td></tr></tbody></table></div>
+      <div class="detail" id="detail">打牌候補を選ぶと、有効牌の内訳を表示します。</div>
+      <p class="fineprint">* 理論受け入れは自分の手牌14枚を除いた枚数で、河・他家の手牌・山の残枚数を反映しません。役は一部の形を判定したもので、打点期待値・アガリ確率ではありません。門前14枚専用です。</p>
+    </section>
+    <section class="card screen-card">
+      <div class="section-header"><div><h2>03 <span>雀魂の画面を読み取る（試験機能）</span></h2><p>ブラウザの画面共有を利用します。最初は手牌の位置登録と画像学習が必要です。</p></div><span id="captureState" class="muted">未接続</span></div>
+      <div class="actionline"><button id="startShare" class="btn">画面共有を開始</button><button id="stopShare" class="btn secondary" disabled>共有停止</button><button id="snap" class="btn secondary" disabled>画面を更新</button><label class="check"><input type="checkbox" id="autoScan"> 約2秒ごとに認識</label></div>
+      <div class="setup-instruction">操作順：①共有する雀魂の画面を選択 → ②下の映像で「左端」「13枚目」「ツモ牌」を順にクリック → ③14枚を手動入力 → ④「手牌14枚を一括学習」をクリック。次の手牌から既習牌を認識できます。</div>
+      <div class="preview-wrap"><canvas id="preview" width="960" height="330" aria-label="共有した画面のプレビュー。位置登録時にクリックしてください"></canvas><div id="previewNote">画面共有を開始すると、ここに雀魂の画面が映ります。</div></div>
+      <div class="actionline"><button id="calibrate" class="btn secondary" disabled>3点の位置登録を開始</button><button id="train" class="btn secondary" disabled>現在の手牌14枚を一括学習</button><button id="recognize" class="btn secondary" disabled>この画面から認識</button><button id="clearSamples" class="btn danger">学習データを消去</button></div>
+      <div class="actionline compact"><label>切り抜き幅 <input type="range" id="cropWidth" min="20" max="100" value="42"><output id="cropWidthVal">42 px</output></label><label>切り抜き高さ <input type="range" id="cropHeight" min="28" max="140" value="63"><output id="cropHeightVal">63 px</output></label><span id="samplesInfo" class="muted">学習：0種類</span></div>
+      <div id="snippets" class="snippets"></div>
+      <p id="captureMessage" class="message">画面共有を使わなくても、上部の手牌入力で分析できます。</p>
+      <p class="fineprint">画面共有はご自身が許可した時だけ開始します。映像や学習画像をサーバーへ送信しません。学習データと位置設定はお使いのブラウザに保存します。認識が曖昧な場合は手牌を自動で変更しません。ブラウザが画面キャプチャに対応していない場合は手入力を利用してください。</p>
+    </section>
+  </main>
+  <footer>雀魂の非公式・個人用試作ツールです。雀魂の運営とは無関係です。対局中の外部補助ツール使用可否はサービスの規約・ルールに従ってください。</footer>
+  <video id="sourceVideo" autoplay muted playsinline hidden></video>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>
